@@ -1,26 +1,33 @@
 const express = require('express');
+const cookieSession = require('cookie-session');
 const usersRepo = require('./repositories/users');
 
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(
+  cookieSession({
+    keys: ['lasgfosahf'],
+  })
+);
 
-app.get('/', (req, res) => {
+app.get('/signup', (req, res) => {
   console.log(req.body);
   res.send(`
-    <div>
-        <form method="POST">
-            <input name="email" placeholder="Email" />
-            <input name="password" placeholder="Password" />
-            <input name="passwordConfirmation" placeholder="Password confirmation" />
-            <button>Sign up</button>
-        </form>
-    </div>
-    `);
+  <div>
+    Your user id is: ${req.session.userId}
+    <form method="POST">
+      <input name="email" placeholder="Email" />
+      <input name="password" placeholder="Password" />
+      <input name="passwordConfirmation" placeholder="Password confirmation" />
+      <button>Sign up</button>
+    </form>
+  </div>
+  `);
 });
 
-app.post('/', async (req, res) => {
+app.post('/signup', async (req, res) => {
   const { email, password, passwordConfirmation } = req.body;
 
   const existingUser = await usersRepo.getOneBy({ email });
@@ -32,8 +39,34 @@ app.post('/', async (req, res) => {
     return res.send('Passwords must match');
   }
 
+  const user = await usersRepo.create({ email, password });
+
+  // Store the user id inside the users cookie
+  req.session.userId = user.id;
+
   res.send('account created');
 });
+
+app.get('/signout', (req, res) => {
+  req.session = null;
+  res.send('You are logged out');
+});
+
+app.get('signin', (req, res) => {
+  res.send(`
+  <div>
+    <form method="POST">
+      <input name="email" placeholder="Email" />
+      <input name="password" placeholder="Password" />
+      <button>Sign in</button>
+    </form>
+  </div>
+  `);
+});
+
+// app.post('/signin', (req, res) => {
+
+// });
 
 app.listen(3000, () => {
   console.log('listening');
