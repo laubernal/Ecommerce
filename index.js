@@ -64,9 +64,24 @@ app.get('signin', (req, res) => {
   `);
 });
 
-// app.post('/signin', (req, res) => {
+app.post('/signin', (req, res) => {
+  const { email, password } = req.body;
 
-// });
+  const user = usersRepo.getOneBy({ email });
+
+  if (!user) {
+    return res.send('Email not found');
+  }
+
+  if (user.password !== password) {
+    return res.send('Invalid password');
+  }
+
+  // This is what makes the user authenticated
+  req.session.userId = user.id;
+
+  res.send('You are signed in');
+});
 
 app.listen(3000, () => {
   console.log('listening');
