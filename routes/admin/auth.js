@@ -23,9 +23,7 @@ router.post(
   '/signup',
   [requireEmail, requirePassword, requirePasswordConfirmation],
   async (req, res) => {
-    console.log('llgo aqui');
     const errors = validationResult(req);
-    console.log(errors);
 
     if (!errors.isEmpty()) {
       return res.send(signUpTemplate({ req, errors }));
@@ -47,12 +45,15 @@ router.get('/signout', (req, res) => {
 });
 
 router.get('/signin', (req, res) => {
-  res.send(signInTemplate());
+  res.send(signInTemplate({}));
 });
 
 router.post('/signin', [requireEmailExists, requireValidPasswordForUser], async (req, res) => {
   const errors = validationResult(req);
-  console.log(errors);
+
+  if (!errors.isEmpty()) {
+    return res.send(signInTemplate({ errors }));
+  }
 
   const { email } = req.body;
   const user = await usersRepo.getOneBy({ email });
