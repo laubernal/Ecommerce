@@ -11,6 +11,7 @@ const {
   requireEmailExists,
   requireValidPasswordForUser,
 } = require('./validators');
+const { handleErrors } = require('./middlewares');
 
 const router = express.Router();
 
@@ -22,14 +23,9 @@ router.get('/signup', (req, res) => {
 router.post(
   '/signup',
   [requireEmail, requirePassword, requirePasswordConfirmation],
+  handleErrors(signUpTemplate),
   async (req, res) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.send(signUpTemplate({ req, errors }));
-    }
-
-    const { email, password, passwordConfirmation } = req.body;
+    const { email, password } = req.body;
     const user = await usersRepo.create({ email, password });
 
     // Store the user id inside the users cookie
@@ -48,20 +44,19 @@ router.get('/signin', (req, res) => {
   res.send(signInTemplate({}));
 });
 
-router.post('/signin', [requireEmailExists, requireValidPasswordForUser], async (req, res) => {
-  const errors = validationResult(req);
+router.post(
+  '/signin',
+  [requireEmailExists, requireValidPasswordForUser],
+  handleErrors(signInTemplate),
+  async (req, res) => {
+    const { email } = req.body;
+    const user = await usersRepo.getOneBy({ email });
 
-  if (!errors.isEmpty()) {
-    return res.send(signInTemplate({ errors }));
+    // This is what makes the user authenticated
+    req.session.userId = user.id;
+
+    res.send('You are signed in');
   }
-
-  const { email } = req.body;
-  const user = await usersRepo.getOneBy({ email });
-
-  // This is what makes the user authenticated
-  req.session.userId = user.id;
-
-  res.send('You are signed in');
-});
+);
 
 module.exports = router;
