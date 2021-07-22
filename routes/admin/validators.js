@@ -32,7 +32,6 @@ module.exports = {
     .isLength({ min: 4, max: 20 })
     .withMessage('Must be between 8 and 20 characters')
     .custom((passwordConfirmation, { req }) => {
-      console.log(passwordConfirmation, req.body.password);
       if (passwordConfirmation != req.body.password) {
         throw new Error('Must be between 8 and 20 characters');
       }
@@ -53,7 +52,7 @@ module.exports = {
   requireValidPasswordForUser: check('password')
     .trim()
     .custom(async (password, { req }) => {
-      const user = usersRepo.getOneBy({ email: req.body.email });
+      const user = await usersRepo.getOneBy({ email: req.body.email });
 
       if (!user) {
         throw new Error('Invalid password');

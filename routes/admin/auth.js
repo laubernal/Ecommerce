@@ -1,5 +1,4 @@
 const express = require('express');
-const { validationResult } = require('express-validator');
 
 const usersRepo = require('../../repositories/users');
 const signUpTemplate = require('../../views/admin/auth/signup');
@@ -16,7 +15,6 @@ const { handleErrors } = require('./middlewares');
 const router = express.Router();
 
 router.get('/signup', (req, res) => {
-  console.log(req.body);
   res.send(signUpTemplate({ req }));
 });
 
@@ -31,7 +29,7 @@ router.post(
     // Store the user id inside the users cookie
     req.session.userId = user.id;
 
-    res.send('Account created');
+    res.redirect('/admin/products');
   }
 );
 
@@ -55,7 +53,7 @@ router.post(
     // This is what makes the user authenticated
     req.session.userId = user.id;
 
-    res.send('You are signed in');
+    res.redirect('/admin/products');
   }
 );
 
