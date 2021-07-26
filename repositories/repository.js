@@ -22,7 +22,7 @@ module.exports = class Repository {
     records.push(attributes);
     await this.writeAll(records);
 
-    return attrs;
+    return attributes;
   }
 
   async getAll() {
@@ -49,7 +49,7 @@ module.exports = class Repository {
     await this.writeAll(filteredRecords);
   }
 
-  async update(id, attrs) {
+  async update(id, attributes) {
     const records = await this.getAll();
     const record = records.find(record => record.id === id);
 
@@ -57,7 +57,7 @@ module.exports = class Repository {
       throw new Error(`Record with id ${id} not found`);
     }
 
-    Object.assign(record, attrs);
+    Object.assign(record, attributes);
     await this.writeAll(records);
   }
 
